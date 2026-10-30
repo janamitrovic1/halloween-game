@@ -117,7 +117,9 @@ export function decide(payload, env) {
   if (!content) return null;
   const path = text(input, 'file_path') || text(input, 'notebook_path');
   const absolute = resolve(env.projectDir, path);
-  const inside = relative(env.projectDir, absolute);
+  // Forward slashes everywhere: git uses them on every platform, and the reason
+  // string is user-facing. `path.relative` returns backslashes on Windows.
+  const inside = relative(env.projectDir, absolute).replaceAll('\\', '/');
   if (inside.startsWith('..') || isAbsolute(inside)) return null;
   if (env.isIgnored(absolute)) return null;
 

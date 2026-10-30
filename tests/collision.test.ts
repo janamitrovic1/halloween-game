@@ -117,4 +117,20 @@ describe('hasCollision', () => {
     };
     expect(hasCollision(dino, [smallCactus(DINO_X + 20)])).toBe(false);
   });
+
+  // Functional spec 2.5: "When the dinosaur passes a cactus with visible
+  // daylight between its body and the cactus, then the run continues (a
+  // near miss is not a crash)."  The dino hitbox excludes the tail and the
+  // head overhang; the cactus hitbox drops its arm tips. At DINO_X=50 the
+  // dino sprite is x in [50, 94) but its hitbox is x in [62, 84). A small
+  // cactus at x=85 has sprite x in [85, 102) and hitbox x in [87, 100), so
+  // the sprites overlap (dino's head overhang meets the cactus's left arm
+  // tip) while the hitboxes are 3 px apart.
+  it('is false for a near miss where sprite boxes overlap but hitboxes are disjoint (functional spec 2.5)', () => {
+    const dino = groundDino();
+    const cactus = smallCactus(DINO_X + 35);
+    expect(intersects(dino, cactus)).toBe(true);
+    expect(intersects(dino.hitbox, cactus.hitbox)).toBe(false);
+    expect(hasCollision(dino, [cactus])).toBe(false);
+  });
 });
