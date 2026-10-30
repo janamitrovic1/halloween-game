@@ -849,6 +849,26 @@ describe('2.7 restarting', () => {
 
     expect(game.state().tick).toBe(0);
   });
+
+  // Functional spec 2.7: "the pace is the same starting pace as a run started
+  // from the start screen, regardless of how fast the previous run had become"
+  // (verified in the spec: "restart after a run at speed 12 starts at speed
+  // 6"). Technical considerations 4.2 row 2.7 restart repeats: `speed ===
+  // START_SPEED` on the restart step.
+  it('resets speed to START_SPEED on the restart step (functional spec 2.7)', () => {
+    const { game } = makeGame(SEED);
+    pressPrimary(game);
+    dieWithoutJumping(game);
+    const dyingSpeed = game.state().speed;
+    // Fixture sanity: the ramp must have moved speed above START_SPEED by the
+    // dying tick, otherwise the behaviour under test is moot.
+    expect(dyingSpeed).toBeGreaterThan(START_SPEED);
+
+    game.dispatch('primary');
+    game.tick();
+
+    expect(game.state().speed).toBe(START_SPEED);
+  });
 });
 
 describe('2.6 score rate', () => {
