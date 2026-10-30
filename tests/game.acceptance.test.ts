@@ -830,6 +830,25 @@ describe('2.7 restarting', () => {
     expect(game.state()).toEqual(before);
     expect(events).toEqual([]);
   });
+
+  // Architecture 2.2 Start and restart: "The step that consumes `primary` in
+  // `idle` or `dead` builds a fresh run from `tuning.ts` initial values …
+  // moves nothing: `tick` is 0 after it." Technical considerations 4.2 row
+  // 2.7 restart repeats: `tick === 0` on the restart step.
+  it('resets tick to 0 on the restart step (architecture 2.2 Start and restart)', () => {
+    const { game } = makeGame(SEED);
+    pressPrimary(game);
+    const dyingTick = dieWithoutJumping(game);
+    // Fixture sanity: the dying run must have taken multiple ticks, otherwise
+    // a leaked tick would already be 0 and the behaviour under test is moot.
+    expect(dyingTick).toBeGreaterThan(0);
+    expect(game.state().tick).toBe(dyingTick);
+
+    game.dispatch('primary');
+    game.tick();
+
+    expect(game.state().tick).toBe(0);
+  });
 });
 
 describe('2.6 score rate', () => {
